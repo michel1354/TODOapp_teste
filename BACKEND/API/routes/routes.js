@@ -20,7 +20,12 @@ router.post('/post', async (req, res) => {
 router.get('/getAll', async (req, res) => {
     try {
         const resultados = await modeloTarefa.find();
-        res.json(resultados)
+        const resposta = {
+            aluno: "Michel Barbosa Meira",
+            ra: "255441",
+            tarefas: resultados
+        };
+        res.json(resposta)
     }
     catch (error) {
         res.status(500).json({ message: error.message })
