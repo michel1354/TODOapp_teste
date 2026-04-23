@@ -18,7 +18,7 @@ export class App {
   constructor(private http: HttpClient) {
     // Detecta se está em produção ou desenvolvimento
     const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    this.apiURL = isDevelopment ? 'http://localhost:3000' : 'https://apitarefasmichel255441.onrender.com';
+    this.apiURL = isDevelopment ? 'http://localhost:3000' : 'https://apitarefas-michel-255441.onrender.com';
     this.READ_tarefas();
   }
 
