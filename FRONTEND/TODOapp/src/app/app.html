@@ -1,29 +1,31 @@
 <div class="main">
   <h1>Michel Barbosa Meira (255441) | Vinnicus de Lacerda (257062) - My To Do List</h1>
   
-  <div *ngIf="usuarioLogado()">
-    <!-- Menu Admin -->
-    <div *ngIf="usuarioAdmin()">
-      <button class="btn-primary" (click)="mostraCadastro.set(!mostraCadastro())" style="background-color: #2196F3;">
-        {{ mostraCadastro() ? 'Ocultar Cadastro' : 'Cadastrar Usuário' }}
-      </button>
+  <!-- Tela de Login (quando não está logado) -->
+  <div *ngIf="!token" class="login-section">
+    <h2>Login</h2>
+    <div class="form-group">
+      <label>Usuário:</label>
+      <input type="text" [(ngModel)]="novoNomeUsuario" placeholder="Digite seu usuário" />
+    </div>
+    <div class="form-group">
+      <label>Senha:</label>
+      <input type="password" [(ngModel)]="novaSenhaUsuario" placeholder="Digite sua senha" />
+    </div>
+    <button class="btn-primary" (click)="fazerLogin()">Entrar</button>
+  </div>
+
+  <!-- Mostra seção de tarefas se estiver logado -->
+  <div *ngIf="token" class="tarefas-section">
+    <div class="header-logado">
+      <span>Usuário: <strong>{{ usuarioLogado }}</strong></span>
+      <span *ngIf="isAdmin" class="badge-admin">ADMIN</span>
+      <button class="btn-danger" (click)="logout()">Logout</button>
+      <button *ngIf="isAdmin" class="btn-usuarios" (click)="abireTelaUsuarios()">Gerenciar Usuários</button>
     </div>
 
-    <!-- Formulário de Cadastro (apenas para admin) -->
-    <div *ngIf="mostraCadastro() && usuarioAdmin()">
-      <h2>Cadastrar Novo Usuário</h2>
-      <input #regUsername placeholder="nome" class="lg-text-input" />
-      <br>
-      <input #regPassword placeholder="senha" type="password" class="lg-text-input" />
-      <br>
-      <input #regPasswordConfirm placeholder="confirmar senha" type="password" class="lg-text-input" />
-      <br>
-      <button class="btn-primary" (click)="register(regUsername.value, regPassword.value, regPasswordConfirm.value)">Cadastrar</button>
-    </div>
-
-    <!-- TODO List -->
     <input class="lg-text-input" (keyup.enter)="CREATE_tarefa(campoNovoItem.value); campoNovoItem.value = '' "
-      #campoNovoItem />
+      #campoNovoItem placeholder="Digite uma nova tarefa..." />
     <button class="btn-primary" (click)="CREATE_tarefa(campoNovoItem.value); campoNovoItem.value = '' ">
       Adicionar Tarefa</button>
     <ul>
@@ -31,16 +33,77 @@
         <app-item [tarefa]="tarefaDoLoop" (removeTarefa)="DELETE_tarefa(tarefaDoLoop)" (modificaTarefa)="UPDATE_tarefa(tarefaDoLoop)"></app-item>
       </li>
     </ul>
-    <button class="btn-primary" (click)="usuarioLogado.set(false); usuarioAdmin.set(false)" style="margin-top: 20px; background-color: #666;">Logout</button>
   </div>
 
-  <!-- Tela de Login -->
-  <div *ngIf="!usuarioLogado()">
-    <h2>Login</h2>
-    <input #username placeholder="nome" class="lg-text-input" />
-    <br>
-    <input #password placeholder="senha" type="password" class="lg-text-input" />
-    <br>
-    <button class="btn-primary" (click)="login(username.value, password.value)">Login</button>
+  <!-- Tela de Gerenciamento de Usuários (apenas admin) -->
+  <div *ngIf="mostraTelaUsuarios()" class="usuarios-modal">
+    <div class="usuarios-container">
+      <div class="usuarios-header">
+        <h2>Gerenciar Usuários</h2>
+        <button class="btn-close" (click)="fecharTelaUsuarios()">✕</button>
+      </div>
+
+      <!-- Lista de Usuários PRIMEIRO -->
+      <div class="usuarios-list">
+        <h3>Lista de Usuários ({{ arrayDeUsuarios().length }})</h3>
+        <div *ngIf="arrayDeUsuarios().length === 0" class="vazio">
+          Nenhum usuário cadastrado
+        </div>
+        
+        <table *ngIf="arrayDeUsuarios().length > 0" class="usuarios-table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Admin</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let usuario of arrayDeUsuarios()" [class.em-edicao]="usuarioEmEdicao?._id === usuario._id">
+              <td>{{ usuario.nome }}</td>
+              <td class="text-center">
+                <span *ngIf="usuario.isAdmin" class="badge-admin">✓</span>
+                <span *ngIf="!usuario.isAdmin" class="badge-user">-</span>
+              </td>
+              <td class="acoes">
+                <button class="btn-edit" (click)="iniciarEdicaoUsuario(usuario)">Editar</button>
+                <button class="btn-delete" (click)="DELETE_usuario(usuario._id)">Deletar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <hr style="margin: 2rem 0; border: 1px solid #ddd;">
+
+      <!-- Formulário de Cadastro/Edição -->
+      <div class="form-usuarios">
+        <h3>{{ usuarioEmEdicao ? 'Editar Usuário' : 'Cadastrar Novo Usuário' }}</h3>
+        
+        <div class="form-group">
+          <label>Nome:</label>
+          <input type="text" [(ngModel)]="novoNomeUsuario" placeholder="Digite o nome do usuário" />
+        </div>
+
+        <div class="form-group" *ngIf="!usuarioEmEdicao">
+          <label>Senha:</label>
+          <input type="password" [(ngModel)]="novaSenhaUsuario" placeholder="Digite a senha (min 6 caracteres)" />
+        </div>
+
+        <div class="form-group checkbox">
+          <label>
+            <input type="checkbox" [(ngModel)]="novoIsAdminUsuario" />
+            É Administrador
+          </label>
+        </div>
+
+        <div class="form-buttons">
+          <button *ngIf="!usuarioEmEdicao" class="btn-primary" (click)="CREATE_usuario()">Cadastrar</button>
+          <button *ngIf="usuarioEmEdicao" class="btn-primary" (click)="UPDATE_usuario()">Atualizar</button>
+          <button class="btn-secondary" (click)="limpaFormularioUsuario()">Limpar</button>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>

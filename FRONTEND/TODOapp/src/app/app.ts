@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { Tarefa } from "./tarefa";
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 
 @Component({
@@ -14,89 +14,226 @@ export class App {
   protected readonly title = signal('TODOapp');
 
   arrayDeTarefas = signal<Tarefa[]>([]);
-  usuarioLogado = signal(false);
-  usuarioAdmin = signal(false);
-  mostraCadastro = signal(false);
-  tokenJWT = '{"token":""}';
+  arrayDeUsuarios = signal<any[]>([]);
+  
   apiURL: string;
+  token: string = '';
+  isAdmin: boolean = false;
+  usuarioLogado: string = '';
+  
+  mostraTelaUsuarios = signal(false);
+  novoNomeUsuario = '';
+  novaSenhaUsuario = '';
+  novoIsAdminUsuario = false;
+  usuarioEmEdicao: any = null;
+
   constructor(private http: HttpClient) {
     // Detecta se está em produção ou desenvolvimento
     const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    this.apiURL = isDevelopment ? 'http://localhost:3000' : 'https://apitarefas-michel-255441.onrender.com';
-  }
-
-  login(username: string, password: string) {
-    var credenciais = { "nome": username, "senha": password }
-    this.http.post(`${this.apiURL}/api/login`, credenciais).subscribe(
-      (resultado: any) => {
-        this.tokenJWT = JSON.stringify(resultado);
-        this.usuarioAdmin.set(resultado.isAdmin || false);
-        this.READ_tarefas();
-      },
-      (error) => {
-        alert('Login falhou!');
-      }
-    );
-  }
-
-  register(username: string, password: string, passwordConfirm: string) {
-    if (password !== passwordConfirm) {
-      alert('Senhas não conferem!');
-      return;
+    this.apiURL = isDevelopment ? 'http://localhost:3000' : 'https://todoapp-teste.onrender.com';
+    
+    // Recupera token e dados do usuário do localStorage
+    const tokenSalvo = localStorage.getItem('id-token');
+    const isAdminSalvo = localStorage.getItem('isAdmin');
+    const usuarioSalvo = localStorage.getItem('usuarioLogado');
+    
+    if (tokenSalvo) {
+      this.token = tokenSalvo;
+      this.isAdmin = isAdminSalvo === 'true';
+      this.usuarioLogado = usuarioSalvo || '';
+      this.READ_tarefas();
     }
-    if (username.trim() === '' || password.trim() === '') {
-      alert('Preencha todos os campos!');
-      return;
-    }
-    const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
-    var credenciais = { "nome": username, "senha": password }
-    this.http.post(`${this.apiURL}/api/register`, credenciais, { 'headers': idToken }).subscribe(
-      (resultado: any) => {
-        alert('Usuario cadastrado com sucesso!');
-        this.mostraCadastro.set(false);
-      },
-      (error) => {
-        alert('Erro ao cadastrar: ' + error.error.message);
-      }
-    );
   }
 
   CREATE_tarefa(descricaoNovaTarefa: string) {
     var novaTarefa = new Tarefa(descricaoNovaTarefa, false);
-    const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
-    this.http.post<Tarefa>(`${this.apiURL}/api/post`, novaTarefa, { 'headers': idToken }).subscribe(
-      (resultado : any) => { console.log(resultado); this.READ_tarefas(); },
-      (error) => { console.error(error); this.usuarioLogado.set(false); }
-    );
+    this.http.post<Tarefa>(`${this.apiURL}/api/post`, novaTarefa, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado : any) => { console.log(resultado); this.READ_tarefas(); });
     
   }
 
-
   READ_tarefas() {
-    const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
-    this.http.get<Tarefa[]>(`${this.apiURL}/api/getAll`, { 'headers': idToken }).subscribe(
-      (resultado : any) => { this.arrayDeTarefas.set(resultado.tarefas); this.usuarioLogado.set(true) },
-      (error) => { this.usuarioLogado.set(false) }
-    );
+    this.http.get<Tarefa[]>(`${this.apiURL}/api/getAll`, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado : any) => this.arrayDeTarefas.set(resultado));
   }
 
   DELETE_tarefa(tarefaAserRemovida: Tarefa) {
     var indice = this.arrayDeTarefas().indexOf(tarefaAserRemovida);
     var id = this.arrayDeTarefas()[indice]._id;
-    const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
-    this.http.delete<Tarefa>(`${this.apiURL}/api/delete/${id}`, { 'headers': idToken }).subscribe(
-      (resultado : any) => { console.log(resultado); this.READ_tarefas(); },
-      (error) => { console.error(error); this.usuarioLogado.set(false); }
-    );
+    this.http.delete<Tarefa>(`${this.apiURL}/api/delete/${id}`, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado : any) => { console.log(resultado); this.READ_tarefas(); });
   }
 
   UPDATE_tarefa(tarefaAserModificada: Tarefa) {
     var indice = this.arrayDeTarefas().indexOf(tarefaAserModificada);
     var id = this.arrayDeTarefas()[indice]._id;
-    const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
-    this.http.patch<Tarefa>(`${this.apiURL}/api/update/${id}`, tarefaAserModificada, { 'headers': idToken }).subscribe(
-      (resultado : any) => { console.log(resultado); this.READ_tarefas(); },
-      (error) => { console.error(error); this.usuarioLogado.set(false); }
+    this.http.patch<Tarefa>(`${this.apiURL}/api/update/${id}`,
+    tarefaAserModificada, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+    (resultado : any) => { console.log(resultado); this.READ_tarefas(); });
+  }
+
+  // ===== GERENCIAMENTO DE USUÁRIOS =====
+
+  abireTelaUsuarios() {
+    this.mostraTelaUsuarios.set(true);
+    this.READ_usuarios();
+    this.limpaFormularioUsuario();
+  }
+
+  fecharTelaUsuarios() {
+    this.mostraTelaUsuarios.set(false);
+    this.limpaFormularioUsuario();
+  }
+
+  READ_usuarios() {
+    this.http.get<any[]>(`${this.apiURL}/api/usuarios`, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado: any) => {
+        this.arrayDeUsuarios.set(resultado);
+        console.log('Usuários carregados:', resultado);
+      },
+      (erro: any) => {
+        console.error('Erro ao carregar usuários:', erro);
+        alert('Erro ao carregar usuários: ' + erro.error.message);
+      }
+    );
+  }
+
+  CREATE_usuario() {
+    if (!this.novoNomeUsuario || !this.novaSenhaUsuario) {
+      alert('Preencha nome e senha!');
+      return;
+    }
+
+    const novoUsuario = {
+      nome: this.novoNomeUsuario,
+      senha: this.novaSenhaUsuario,
+      isAdmin: this.novoIsAdminUsuario
+    };
+
+    this.http.post<any>(`${this.apiURL}/api/register`, novoUsuario, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado: any) => {
+        console.log('Usuário criado:', resultado);
+        alert('Usuário cadastrado com sucesso!');
+        this.limpaFormularioUsuario();
+        this.READ_usuarios();
+      },
+      (erro: any) => {
+        console.error('Erro ao criar usuário:', erro);
+        alert('Erro ao cadastrar: ' + erro.error.message);
+      }
+    );
+  }
+
+  UPDATE_usuario() {
+    if (!this.usuarioEmEdicao) return;
+
+    const dadosAtualizacao = {
+      nome: this.novoNomeUsuario || this.usuarioEmEdicao.nome,
+      isAdmin: this.novoIsAdminUsuario
+    };
+
+    this.http.patch<any>(`${this.apiURL}/api/usuarios/${this.usuarioEmEdicao._id}`, dadosAtualizacao, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado: any) => {
+        console.log('Usuário atualizado:', resultado);
+        alert('Usuário atualizado com sucesso!');
+        this.limpaFormularioUsuario();
+        this.READ_usuarios();
+      },
+      (erro: any) => {
+        console.error('Erro ao atualizar usuário:', erro);
+        alert('Erro ao atualizar: ' + erro.error.message);
+      }
+    );
+  }
+
+  DELETE_usuario(usuarioId: string) {
+    if (!confirm('Tem certeza que deseja deletar este usuário?')) return;
+
+    this.http.delete<any>(`${this.apiURL}/api/usuarios/${usuarioId}`, {
+      headers: { 'id-token': this.token }
+    }).subscribe(
+      (resultado: any) => {
+        console.log('Usuário deletado:', resultado);
+        alert('Usuário deletado com sucesso!');
+        this.READ_usuarios();
+      },
+      (erro: any) => {
+        console.error('Erro ao deletar usuário:', erro);
+        alert('Erro ao deletar: ' + erro.error.message);
+      }
+    );
+  }
+
+  iniciarEdicaoUsuario(usuario: any) {
+    this.usuarioEmEdicao = usuario;
+    this.novoNomeUsuario = usuario.nome;
+    this.novoIsAdminUsuario = usuario.isAdmin;
+    this.novaSenhaUsuario = ''; // Não preenchemos a senha
+  }
+
+  limpaFormularioUsuario() {
+    this.novoNomeUsuario = '';
+    this.novaSenhaUsuario = '';
+    this.novoIsAdminUsuario = false;
+    this.usuarioEmEdicao = null;
+  }
+
+  logout() {
+    localStorage.removeItem('id-token');
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('usuarioLogado');
+    this.token = '';
+    this.isAdmin = false;
+    this.usuarioLogado = '';
+    this.arrayDeTarefas.set([]);
+    this.mostraTelaUsuarios.set(false);
+  }
+
+  fazerLogin() {
+    if (!this.novoNomeUsuario || !this.novaSenhaUsuario) {
+      alert('Preencha usuário e senha!');
+      return;
+    }
+
+    const credenciais = {
+      nome: this.novoNomeUsuario,
+      senha: this.novaSenhaUsuario
+    };
+
+    this.http.post<any>(`${this.apiURL}/api/login`, credenciais).subscribe(
+      (resultado: any) => {
+        console.log('Login realizado:', resultado);
+        this.token = resultado.token;
+        this.isAdmin = resultado.isAdmin;
+        this.usuarioLogado = this.novoNomeUsuario;
+        
+        // Salva no localStorage
+        localStorage.setItem('id-token', resultado.token);
+        localStorage.setItem('isAdmin', resultado.isAdmin.toString());
+        localStorage.setItem('usuarioLogado', this.novoNomeUsuario);
+        
+        this.limpaFormularioUsuario();
+        this.READ_tarefas();
+      },
+      (erro: any) => {
+        console.error('Erro ao fazer login:', erro);
+        alert('Erro ao fazer login: ' + erro.error.message);
+        this.novaSenhaUsuario = '';
+      }
     );
   }
    

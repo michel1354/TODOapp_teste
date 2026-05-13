@@ -45,4 +45,321 @@ body {
    ul li {
     list-style: none;
    }
+
+   /* ===== NOVOS ESTILOS =====
+
+   /* Login Section */
+   .login-section {
+    padding: 2rem;
+    text-align: center;
+   }
+
+   .login-section h2 {
+    margin-bottom: 1.5rem;
+    color: #333;
+   }
+
+   .tarefas-section {
+    margin-top: 2rem;
+   }
+
+   .header-logado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #e8f5e9;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+   }
+
+   .badge-admin {
+    background-color: #ff9800;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-weight: bold;
+   }
+
+   .badge-user {
+    color: #999;
+    font-size: 1rem;
+   }
+
+   .btn-primary, .btn-secondary, .btn-edit, .btn-delete, .btn-usuarios, .btn-danger, .btn-close {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-weight: bold;
+   }
+
+   .btn-primary {
+    background-color: #4CAF50;
+    color: white;
+   }
+
+   .btn-primary:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+   }
+
+   .btn-secondary {
+    background-color: #999;
+    color: white;
+   }
+
+   .btn-secondary:hover {
+    background-color: #777;
+   }
+
+   .btn-usuarios {
+    background-color: #2196F3;
+    color: white;
+   }
+
+   .btn-usuarios:hover {
+    background-color: #0b7dda;
+   }
+
+   .btn-danger {
+    background-color: #f44336;
+    color: white;
+   }
+
+   .btn-danger:hover {
+    background-color: #da190b;
+   }
+
+   .btn-edit {
+    background-color: #2196F3;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+   }
+
+   .btn-edit:hover {
+    background-color: #0b7dda;
+   }
+
+   .btn-delete {
+    background-color: #f44336;
+    color: white;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+   }
+
+   .btn-delete:hover {
+    background-color: #da190b;
+   }
+
+   .btn-close {
+    background-color: #f44336;
+    padding: 0.5rem 1rem;
+    font-size: 1.5rem;
+   }
+
+   .btn-close:hover {
+    background-color: #da190b;
+   }
+
+   /* Modal de Usuários */
+   .usuarios-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+   }
+
+   .usuarios-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+   }
+
+   .usuarios-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 1rem;
+   }
+
+   .usuarios-header h2 {
+    margin: 0;
+   }
+
+   .form-usuarios {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    border: 1px solid #ddd;
+   }
+
+   .form-usuarios h3 {
+    margin-top: 0;
+    color: #333;
+   }
+
+   .form-group {
+    margin-bottom: 1rem;
+    text-align: left;
+   }
+
+   .form-group label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+   }
+
+   .form-group input[type="text"],
+   .form-group input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+   }
+
+   .form-group.checkbox label {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+   }
+
+   .form-group.checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+    width: auto;
+   }
+
+   .form-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+   }
+
+   .form-buttons button {
+    flex: 1;
+   }
+
+   .usuarios-list {
+    margin-top: 2rem;
+   }
+
+   .usuarios-list h3 {
+    margin-bottom: 1rem;
+    text-align: left;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5rem;
+   }
+
+   .usuarios-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+   }
+
+   .usuarios-table thead {
+    background-color: #f0f0f0;
+   }
+
+   .usuarios-table th,
+   .usuarios-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+   }
+
+   .usuarios-table th {
+    font-weight: bold;
+    background-color: #e8f5e9;
+   }
+
+   .usuarios-table tbody tr:hover {
+    background-color: #f5f5f5;
+   }
+
+   .usuarios-table tbody tr.em-edicao {
+    background-color: #fff3cd;
+   }
+
+   .usuarios-table .text-center {
+    text-align: center;
+   }
+
+   .usuarios-table .acoes {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+   }
+
+   .vazio {
+    padding: 2rem;
+    text-align: center;
+    color: #999;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+   }
+
+   @media screen and (max-width: 600px) {
+    .usuarios-container {
+      width: 95%;
+      padding: 1rem;
+    }
+
+    .header-logado {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-buttons {
+      flex-direction: column;
+    }
+
+    .usuarios-table {
+      font-size: 0.85rem;
+    }
+
+    .usuarios-table th,
+    .usuarios-table td {
+      padding: 0.5rem;
+    }
+
+    .usuarios-table .acoes {
+      flex-direction: column;
+    }
+
+    .form-usuarios {
+      margin-top: 2rem;
+      padding: 1rem;
+    }
+
+    .usuarios-container {
+      padding: 1rem 0.5rem;
+    }
+   }
    
