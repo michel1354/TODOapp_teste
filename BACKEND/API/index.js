@@ -15,10 +15,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const Name:              todoapp-frontend
-Build Command:     cd FRONTEND/TODOapp && npm install && ng build --configuration production
-Publish Directory: FRONTEND/TODOapp/dist/todoapp/browser
-Branch:            mainPORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 const routes = require('./routes/routes');
 app.use('/api', routes);
 
