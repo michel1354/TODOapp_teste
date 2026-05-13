@@ -2,15 +2,8 @@ const express = require('express');
 const router = express.Router()
 module.exports = router;
 const modeloTarefa = require('../models/tarefa');
+const userModel = require('../models/user');
 const jwt = require('jsonwebtoken');
-
-// Middleware de Autenticação - verifica username e senha
-function verificaUsuarioSenha(req, res, next) {
-  if (req.body.nome !== 'branqs' || req.body.senha !== '1234') {
-    return res.status(401).json({ auth: false, message: 'Usuario ou Senha incorreta' });
-  }
-  next();
-}
 
 // Middleware de Autorização - verifica JWT token
 function verificaJWT(req, res, next) {
@@ -24,13 +17,20 @@ function verificaJWT(req, res, next) {
   });
 }
 
-// Endpoint de Login - retorna JWT token
-router.post('/login', (req, res, next) => {
-  if (req.body.nome === 'branqs' && req.body.senha === '1234') {
-    const token = jwt.sign({ id: req.body.nome }, 'segredo', { expiresIn: 300 });
-    return res.json({ auth: true, token: token });
+// Endpoint de Login - Busca usuário no BD e compara senha
+router.post('/login', async (req, res) => {
+  try {
+    const data = await userModel.findOne({ 'nome': req.body.nome });
+
+    if (data != null && data.senha === req.body.senha) {
+      const token = jwt.sign({ id: req.body.nome }, 'segredo', { expiresIn: 300 });
+      return res.json({ auth: true, token: token });
+    }
+
+    res.status(500).json({ message: 'Login invalido!' });
+  } catch (error) {
+    res.status(500).json({ message: error.message })
   }
-  res.status(500).json({ message: 'Login invalido!' });
 });
 
 router.post('/post', verificaJWT, async (req, res) => {
