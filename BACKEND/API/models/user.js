@@ -7,6 +7,10 @@ var userSchema = new mongoose.Schema({
  senha: {
  type: String
  },
+ isAdmin: {
+ type: Boolean,
+ default: false
+ }
 },
  {
  versionKey: false

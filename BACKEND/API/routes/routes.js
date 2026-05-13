@@ -13,6 +13,26 @@ function verificaJWT(req, res, next) {
   });
   jwt.verify(token, 'segredo', function (err, decoded) {
     if (err) return res.status(500).json({ auth: false, message: 'Falha na autenticação!' });
+    req.user = decoded;
+    next();
+  });
+}
+
+// Middleware de Admin - verifica se é administrador
+function verificaAdmin(req, res, next) {
+  const token = req.headers['id-token'];
+  if (!token) return res.status(401).json({
+    auth: false, message: 'Token nao fornecido'
+  });
+  jwt.verify(token, 'segredo', async function (err, decoded) {
+    if (err) return res.status(500).json({ auth: false, message: 'Falha na autenticação!' });
+    
+    // Busca o usuário para verificar se é admin
+    const usuario = await userModel.findOne({ 'nome': decoded.id });
+    if (!usuario || !usuario.isAdmin) {
+      return res.status(403).json({ auth: false, message: 'Acesso negado! Apenas administradores podem realizar esta ação.' });
+    }
+    req.user = decoded;
     next();
   });
 }
@@ -23,8 +43,8 @@ router.post('/login', async (req, res) => {
     const data = await userModel.findOne({ 'nome': req.body.nome });
 
     if (data != null && data.senha === req.body.senha) {
-      const token = jwt.sign({ id: req.body.nome }, 'segredo', { expiresIn: 300 });
-      return res.json({ auth: true, token: token });
+      const token = jwt.sign({ id: req.body.nome, isAdmin: data.isAdmin }, 'segredo', { expiresIn: 300 });
+      return res.json({ auth: true, token: token, isAdmin: data.isAdmin });
     }
 
     res.status(500).json({ message: 'Login invalido!' });
@@ -33,8 +53,8 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Endpoint de Registro - Cadastra novo usuário no BD
-router.post('/register', async (req, res) => {
+// Endpoint de Registro - Cadastra novo usuário no BD (APENAS ADMIN)
+router.post('/register', verificaAdmin, async (req, res) => {
   try {
     // Verifica se o usuário já existe
     const usuarioExistente = await userModel.findOne({ 'nome': req.body.nome });

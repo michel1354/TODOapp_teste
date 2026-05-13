@@ -15,6 +15,7 @@ export class App {
 
   arrayDeTarefas = signal<Tarefa[]>([]);
   usuarioLogado = signal(false);
+  usuarioAdmin = signal(false);
   mostraCadastro = signal(false);
   tokenJWT = '{"token":""}';
   apiURL: string;
@@ -29,6 +30,7 @@ export class App {
     this.http.post(`${this.apiURL}/api/login`, credenciais).subscribe(
       (resultado: any) => {
         this.tokenJWT = JSON.stringify(resultado);
+        this.usuarioAdmin.set(resultado.isAdmin || false);
         this.READ_tarefas();
       },
       (error) => {
@@ -46,10 +48,11 @@ export class App {
       alert('Preencha todos os campos!');
       return;
     }
+    const idToken = new HttpHeaders().set("id-token", JSON.parse(this.tokenJWT).token);
     var credenciais = { "nome": username, "senha": password }
-    this.http.post(`${this.apiURL}/api/register`, credenciais).subscribe(
+    this.http.post(`${this.apiURL}/api/register`, credenciais, { 'headers': idToken }).subscribe(
       (resultado: any) => {
-        alert('Usuario cadastrado com sucesso! Faça login agora.');
+        alert('Usuario cadastrado com sucesso!');
         this.mostraCadastro.set(false);
       },
       (error) => {

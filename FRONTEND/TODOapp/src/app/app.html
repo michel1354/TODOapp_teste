@@ -2,6 +2,26 @@
   <h1>Michel Barbosa Meira (255441) | Vinnicus de Lacerda (257062) - My To Do List</h1>
   
   <div *ngIf="usuarioLogado()">
+    <!-- Menu Admin -->
+    <div *ngIf="usuarioAdmin()">
+      <button class="btn-primary" (click)="mostraCadastro.set(!mostraCadastro())" style="background-color: #2196F3;">
+        {{ mostraCadastro() ? 'Ocultar Cadastro' : 'Cadastrar Usuário' }}
+      </button>
+    </div>
+
+    <!-- Formulário de Cadastro (apenas para admin) -->
+    <div *ngIf="mostraCadastro() && usuarioAdmin()">
+      <h2>Cadastrar Novo Usuário</h2>
+      <input #regUsername placeholder="nome" class="lg-text-input" />
+      <br>
+      <input #regPassword placeholder="senha" type="password" class="lg-text-input" />
+      <br>
+      <input #regPasswordConfirm placeholder="confirmar senha" type="password" class="lg-text-input" />
+      <br>
+      <button class="btn-primary" (click)="register(regUsername.value, regPassword.value, regPasswordConfirm.value)">Cadastrar</button>
+    </div>
+
+    <!-- TODO List -->
     <input class="lg-text-input" (keyup.enter)="CREATE_tarefa(campoNovoItem.value); campoNovoItem.value = '' "
       #campoNovoItem />
     <button class="btn-primary" (click)="CREATE_tarefa(campoNovoItem.value); campoNovoItem.value = '' ">
@@ -11,32 +31,16 @@
         <app-item [tarefa]="tarefaDoLoop" (removeTarefa)="DELETE_tarefa(tarefaDoLoop)" (modificaTarefa)="UPDATE_tarefa(tarefaDoLoop)"></app-item>
       </li>
     </ul>
-    <button class="btn-primary" (click)="usuarioLogado.set(false)" style="margin-top: 20px; background-color: #666;">Logout</button>
+    <button class="btn-primary" (click)="usuarioLogado.set(false); usuarioAdmin.set(false)" style="margin-top: 20px; background-color: #666;">Logout</button>
   </div>
 
+  <!-- Tela de Login -->
   <div *ngIf="!usuarioLogado()">
-    <!-- Formulário de Login -->
-    <div *ngIf="!mostraCadastro()">
-      <h2>Login</h2>
-      <input #username placeholder="nome" class="lg-text-input" />
-      <br>
-      <input #password placeholder="senha" type="password" class="lg-text-input" />
-      <br>
-      <button class="btn-primary" (click)="login(username.value, password.value)">Login</button>
-      <button class="btn-primary" (click)="mostraCadastro.set(true)" style="margin-left: 10px; background-color: #666;">Cadastro</button>
-    </div>
-
-    <!-- Formulário de Cadastro -->
-    <div *ngIf="mostraCadastro()">
-      <h2>Cadastrar</h2>
-      <input #regUsername placeholder="nome" class="lg-text-input" />
-      <br>
-      <input #regPassword placeholder="senha" type="password" class="lg-text-input" />
-      <br>
-      <input #regPasswordConfirm placeholder="confirmar senha" type="password" class="lg-text-input" />
-      <br>
-      <button class="btn-primary" (click)="register(regUsername.value, regPassword.value, regPasswordConfirm.value)">Cadastrar</button>
-      <button class="btn-primary" (click)="mostraCadastro.set(false)" style="margin-left: 10px; background-color: #666;">Voltar</button>
-    </div>
+    <h2>Login</h2>
+    <input #username placeholder="nome" class="lg-text-input" />
+    <br>
+    <input #password placeholder="senha" type="password" class="lg-text-input" />
+    <br>
+    <button class="btn-primary" (click)="login(username.value, password.value)">Login</button>
   </div>
 </div>
