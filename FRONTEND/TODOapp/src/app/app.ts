@@ -15,6 +15,7 @@ export class App {
 
   arrayDeTarefas = signal<Tarefa[]>([]);
   usuarioLogado = signal(false);
+  mostraCadastro = signal(false);
   tokenJWT = '{"token":""}';
   apiURL: string;
   constructor(private http: HttpClient) {
@@ -32,6 +33,27 @@ export class App {
       },
       (error) => {
         alert('Login falhou!');
+      }
+    );
+  }
+
+  register(username: string, password: string, passwordConfirm: string) {
+    if (password !== passwordConfirm) {
+      alert('Senhas não conferem!');
+      return;
+    }
+    if (username.trim() === '' || password.trim() === '') {
+      alert('Preencha todos os campos!');
+      return;
+    }
+    var credenciais = { "nome": username, "senha": password }
+    this.http.post(`${this.apiURL}/api/register`, credenciais).subscribe(
+      (resultado: any) => {
+        alert('Usuario cadastrado com sucesso! Faça login agora.');
+        this.mostraCadastro.set(false);
+      },
+      (error) => {
+        alert('Erro ao cadastrar: ' + error.error.message);
       }
     );
   }

@@ -33,6 +33,28 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Endpoint de Registro - Cadastra novo usuário no BD
+router.post('/register', async (req, res) => {
+  try {
+    // Verifica se o usuário já existe
+    const usuarioExistente = await userModel.findOne({ 'nome': req.body.nome });
+    if (usuarioExistente) {
+      return res.status(400).json({ message: 'Usuario ja existe!' });
+    }
+
+    // Cria novo usuário
+    const novoUsuario = new userModel({
+      nome: req.body.nome,
+      senha: req.body.senha
+    });
+
+    await novoUsuario.save();
+    res.status(201).json({ message: 'Usuario cadastrado com sucesso!', usuario: novoUsuario });
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+});
+
 router.post('/post', verificaJWT, async (req, res) => {
     const objetoTarefa = new modeloTarefa({
         descricao: req.body.descricao,

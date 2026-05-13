@@ -11,14 +11,32 @@
         <app-item [tarefa]="tarefaDoLoop" (removeTarefa)="DELETE_tarefa(tarefaDoLoop)" (modificaTarefa)="UPDATE_tarefa(tarefaDoLoop)"></app-item>
       </li>
     </ul>
+    <button class="btn-primary" (click)="usuarioLogado.set(false)" style="margin-top: 20px; background-color: #666;">Logout</button>
   </div>
 
   <div *ngIf="!usuarioLogado()">
-    <h2>Login</h2>
-    <input #username placeholder="nome" class="lg-text-input" />
-    <br>
-    <input #password placeholder="senha" type="password" class="lg-text-input" />
-    <br>
-    <button class="btn-primary" (click)="login(username.value, password.value)">Login</button>
+    <!-- Formulário de Login -->
+    <div *ngIf="!mostraCadastro()">
+      <h2>Login</h2>
+      <input #username placeholder="nome" class="lg-text-input" />
+      <br>
+      <input #password placeholder="senha" type="password" class="lg-text-input" />
+      <br>
+      <button class="btn-primary" (click)="login(username.value, password.value)">Login</button>
+      <button class="btn-primary" (click)="mostraCadastro.set(true)" style="margin-left: 10px; background-color: #666;">Cadastro</button>
+    </div>
+
+    <!-- Formulário de Cadastro -->
+    <div *ngIf="mostraCadastro()">
+      <h2>Cadastrar</h2>
+      <input #regUsername placeholder="nome" class="lg-text-input" />
+      <br>
+      <input #regPassword placeholder="senha" type="password" class="lg-text-input" />
+      <br>
+      <input #regPasswordConfirm placeholder="confirmar senha" type="password" class="lg-text-input" />
+      <br>
+      <button class="btn-primary" (click)="register(regUsername.value, regPassword.value, regPasswordConfirm.value)">Cadastrar</button>
+      <button class="btn-primary" (click)="mostraCadastro.set(false)" style="margin-left: 10px; background-color: #666;">Voltar</button>
+    </div>
   </div>
 </div>
