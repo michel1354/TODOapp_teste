@@ -16,6 +16,7 @@
     "mongodb": "^7.1.1",
     "mongoose": "^9.4.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0"
   }
 }

@@ -9,7 +9,7 @@ const corsOptions = {
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['HEAD', 'GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
   credentials: true,
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept']
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'id-token']
 };
 
 app.use(cors(corsOptions));
