@@ -6,7 +6,7 @@ const app = express();
 
 // CORS Configuration - permite requisições de qualquer origem
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: ['https://todoapp-michel-255441.onrender.com', 'http://localhost:4200', 'http://127.0.0.1:4200'],
   methods: ['HEAD', 'GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
   credentials: true,
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'id-token']
