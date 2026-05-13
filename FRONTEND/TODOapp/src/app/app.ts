@@ -103,7 +103,11 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao carregar usuários:', erro);
-        alert('Erro ao carregar usuários: ' + erro.error.message);
+        let mensagem = 'Erro ao carregar usuários';
+        if (erro.error && erro.error.message) {
+          mensagem = erro.error.message;
+        }
+        alert(mensagem);
       }
     );
   }
@@ -131,7 +135,11 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao criar usuário:', erro);
-        alert('Erro ao cadastrar: ' + erro.error.message);
+        let mensagem = 'Erro ao cadastrar';
+        if (erro.error && erro.error.message) {
+          mensagem = erro.error.message;
+        }
+        alert(mensagem);
       }
     );
   }
@@ -155,7 +163,11 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao atualizar usuário:', erro);
-        alert('Erro ao atualizar: ' + erro.error.message);
+        let mensagem = 'Erro ao atualizar';
+        if (erro.error && erro.error.message) {
+          mensagem = erro.error.message;
+        }
+        alert(mensagem);
       }
     );
   }
@@ -173,7 +185,11 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao deletar usuário:', erro);
-        alert('Erro ao deletar: ' + erro.error.message);
+        let mensagem = 'Erro ao deletar';
+        if (erro.error && erro.error.message) {
+          mensagem = erro.error.message;
+        }
+        alert(mensagem);
       }
     );
   }
@@ -231,7 +247,17 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao fazer login:', erro);
-        alert('Erro ao fazer login: ' + erro.error.message);
+        let mensagem = 'Erro ao fazer login';
+        
+        if (erro.status === 0) {
+          mensagem = 'Erro de conexão com o servidor. Verifique se o servidor está rodando.';
+        } else if (erro.error && erro.error.message) {
+          mensagem = erro.error.message;
+        } else if (erro.error) {
+          mensagem = typeof erro.error === 'string' ? erro.error : JSON.stringify(erro.error);
+        }
+        
+        alert(mensagem);
         this.novaSenhaUsuario = '';
       }
     );
