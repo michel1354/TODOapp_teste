@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router()
+const bcrypt = require('bcrypt');
 module.exports = router;
 const modeloTarefa = require('../models/tarefa');
 const userModel = require('../models/user');
@@ -40,38 +41,143 @@ function verificaAdmin(req, res, next) {
 // Endpoint de Login - Busca usuário no BD e compara senha
 router.post('/login', async (req, res) => {
   try {
+    // Validação de entrada
+    if (!req.body.nome || !req.body.senha) {
+      return res.status(400).json({ message: 'Nome e senha são obrigatórios!' });
+    }
+
     const data = await userModel.findOne({ 'nome': req.body.nome });
 
-    if (data != null && data.senha === req.body.senha) {
+    if (data == null) {
+      return res.status(401).json({ message: 'Login inválido!' });
+    }
+
+    // Comparar senha com hash
+    const senhaValida = await bcrypt.compare(req.body.senha, data.senha);
+    if (senhaValida) {
       const token = jwt.sign({ id: req.body.nome, isAdmin: data.isAdmin }, 'segredo', { expiresIn: 300 });
       return res.json({ auth: true, token: token, isAdmin: data.isAdmin });
     }
 
-    res.status(500).json({ message: 'Login invalido!' });
+    res.status(401).json({ message: 'Login inválido!' });
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Erro ao processar login' })
   }
 });
 
 // Endpoint de Registro - Cadastra novo usuário no BD (APENAS ADMIN)
 router.post('/register', verificaAdmin, async (req, res) => {
   try {
-    // Verifica se o usuário já existe
-    const usuarioExistente = await userModel.findOne({ 'nome': req.body.nome });
-    if (usuarioExistente) {
-      return res.status(400).json({ message: 'Usuario ja existe!' });
+    // Validação de entrada
+    if (!req.body.nome || !req.body.senha) {
+      return res.status(400).json({ message: 'Nome e senha são obrigatórios!' });
     }
+
+    if (req.body.nome.trim().length < 3) {
+      return res.status(400).json({ message: 'Nome deve ter pelo menos 3 caracteres!' });
+    }
+
+    if (req.body.senha.length < 6) {
+      return res.status(400).json({ message: 'Senha deve ter pelo menos 6 caracteres!' });
+    }
+
+    // Verifica se o usuário já existe
+    const usuarioExistente = await userModel.findOne({ 'nome': req.body.nome.trim() });
+    if (usuarioExistente) {
+      return res.status(400).json({ message: 'Usuário já existe!' });
+    }
+
+    // Criptografa a senha
+    const senhaHash = await bcrypt.hash(req.body.senha, 10);
 
     // Cria novo usuário
     const novoUsuario = new userModel({
-      nome: req.body.nome,
-      senha: req.body.senha
+      nome: req.body.nome.trim(),
+      senha: senhaHash,
+      isAdmin: req.body.isAdmin || false
     });
 
     await novoUsuario.save();
-    res.status(201).json({ message: 'Usuario cadastrado com sucesso!', usuario: novoUsuario });
+    res.status(201).json({ message: 'Usuário cadastrado com sucesso!', usuario: { nome: novoUsuario.nome, isAdmin: novoUsuario.isAdmin } });
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Este nome de usuário já está cadastrado!' });
+    }
+    res.status(500).json({ message: 'Erro ao cadastrar usuário' })
+  }
+});
+
+// Endpoint para listar todos os usuários (APENAS ADMIN)
+router.get('/usuarios', verificaAdmin, async (req, res) => {
+  try {
+    const usuarios = await userModel.find({}, { senha: 0 }); // Não retorna a senha
+    res.json(usuarios);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao listar usuários' });
+  }
+});
+
+// Endpoint para atualizar usuário (APENAS ADMIN)
+router.patch('/usuarios/:id', verificaAdmin, async (req, res) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: 'ID do usuário é obrigatório!' });
+    }
+
+    const { nome, isAdmin } = req.body;
+    
+    // Valida se está tentando alterar nome
+    if (nome) {
+      if (nome.trim().length < 3) {
+        return res.status(400).json({ message: 'Nome deve ter pelo menos 3 caracteres!' });
+      }
+      
+      // Verifica se o novo nome já existe em outro usuário
+      const usuarioComMesmoNome = await userModel.findOne({ 
+        'nome': nome.trim(),
+        '_id': { $ne: req.params.id }
+      });
+      if (usuarioComMesmoNome) {
+        return res.status(400).json({ message: 'Este nome de usuário já está cadastrado!' });
+      }
+    }
+
+    const updateData = {};
+    if (nome) updateData.nome = nome.trim();
+    if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
+
+    const usuarioAtualizado = await userModel.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!usuarioAtualizado) {
+      return res.status(404).json({ message: 'Usuário não encontrado!' });
+    }
+
+    res.json({ message: 'Usuário atualizado com sucesso!', usuario: usuarioAtualizado });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao atualizar usuário' });
+  }
+});
+
+// Endpoint para deletar usuário (APENAS ADMIN)
+router.delete('/usuarios/:id', verificaAdmin, async (req, res) => {
+  try {
+    if (!req.params.id) {
+      return res.status(400).json({ message: 'ID do usuário é obrigatório!' });
+    }
+
+    const usuarioDeletado = await userModel.findByIdAndDelete(req.params.id);
+
+    if (!usuarioDeletado) {
+      return res.status(404).json({ message: 'Usuário não encontrado!' });
+    }
+
+    res.json({ message: 'Usuário deletado com sucesso!' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao deletar usuário' });
   }
 });
 
