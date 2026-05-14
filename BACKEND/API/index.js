@@ -1,20 +1,14 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader('Access-Control-Allow-Methods', 'HEAD, GET, POST, PATCH, DELETE, OPTIONS');
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, id-token"
-    );
-    
-    // Responder aos preflight requests
-    if (req.method === 'OPTIONS') {
-        return res.sendStatus(200);
-    }
-    
-    next();
-});
+
+// Configurar CORS
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'id-token']
+}));
+
 app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const routes = require('./routes/routes');
