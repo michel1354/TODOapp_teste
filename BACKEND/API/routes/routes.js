@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router()
-const bcrypt = require('bcrypt');
 const modeloTarefa = require('../models/tarefa');
 const userModel = require('../models/user');
 const jwt = require('jsonwebtoken');
@@ -52,9 +51,8 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Login inválido!' });
     }
 
-    // Comparar senha com hash
-    const senhaValida = await bcrypt.compare(req.body.senha, data.senha);
-    if (senhaValida) {
+    // Comparar senha diretamente (texto plano)
+    if (data.senha === req.body.senha) {
       const token = jwt.sign({ id: req.body.nome, isAdmin: data.isAdmin }, JWT_SECRET, { expiresIn: 300 });
       return res.json({ auth: true, token: token, isAdmin: data.isAdmin });
     }
@@ -87,13 +85,10 @@ router.post('/register', verificaAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Usuário já existe!' });
     }
 
-    // Criptografa a senha
-    const senhaHash = await bcrypt.hash(req.body.senha, 10);
-
-    // Cria novo usuário
+    // Cria novo usuário com senha em texto plano
     const novoUsuario = new userModel({
       nome: req.body.nome.trim(),
-      senha: senhaHash,
+      senha: req.body.senha,
       isAdmin: req.body.isAdmin || false
     });
 
