@@ -75,10 +75,6 @@ router.post('/register', verificaAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Nome deve ter pelo menos 3 caracteres!' });
     }
 
-    if (req.body.senha.length < 6) {
-      return res.status(400).json({ message: 'Senha deve ter pelo menos 6 caracteres!' });
-    }
-
     // Verifica se o usuário já existe
     const usuarioExistente = await userModel.findOne({ 'nome': req.body.nome.trim() });
     if (usuarioExistente) {
