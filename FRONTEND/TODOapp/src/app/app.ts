@@ -146,10 +146,15 @@ export class App {
   UPDATE_usuario() {
     if (!this.usuarioEmEdicao) return;
 
-    const dadosAtualizacao = {
+    const dadosAtualizacao: any = {
       nome: this.novoNomeUsuario || this.usuarioEmEdicao.nome,
       isAdmin: this.novoIsAdminUsuario
     };
+
+    // Incluir senha se foi fornecida
+    if (this.novaSenhaUsuario) {
+      dadosAtualizacao.senha = this.novaSenhaUsuario;
+    }
 
     this.http.patch<any>(`${this.apiURL}/api/usuarios/${this.usuarioEmEdicao._id}`, dadosAtualizacao, {
       headers: { 'id-token': this.token }

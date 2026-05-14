@@ -117,6 +117,8 @@ router.patch('/usuarios/:id', verificaAdmin, async (req, res) => {
 
     const { nome, isAdmin } = req.body;
     
+    const { nome, senha, isAdmin } = req.body;
+    
     // Valida se está tentando alterar nome
     if (nome) {
       if (nome.trim().length < 3) {
@@ -135,6 +137,7 @@ router.patch('/usuarios/:id', verificaAdmin, async (req, res) => {
 
     const updateData = {};
     if (nome) updateData.nome = nome.trim();
+    if (senha) updateData.senha = senha;
     if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
 
     const usuarioAtualizado = await userModel.findByIdAndUpdate(

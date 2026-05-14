@@ -52,9 +52,10 @@
           <input type="text" [(ngModel)]="novoNomeUsuario" placeholder="Digite o nome do usuário" />
         </div>
 
-        <div class="form-group" *ngIf="!usuarioEmEdicao">
+        <div class="form-group">
           <label>Senha:</label>
-          <input type="password" [(ngModel)]="novaSenhaUsuario" placeholder="Digite a senha (min 6 caracteres)" />
+          <input type="password" [(ngModel)]="novaSenhaUsuario" 
+            [placeholder]="usuarioEmEdicao ? 'Deixe em branco para não alterar' : 'Digite a senha'" />
         </div>
 
         <div class="form-group checkbox">
