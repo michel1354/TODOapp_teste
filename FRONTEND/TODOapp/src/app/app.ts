@@ -34,7 +34,7 @@ export class App {
     if (isDevelopment) {
       this.apiURL = 'http://localhost:3000';
     } else if (window.location.hostname.includes('onrender.com')) {
-      this.apiURL = 'https://todoapp-michel-255441.onrender.com'; // URL do backend em produção
+      this.apiURL = 'https://apifarefas-michel-255441.onrender.com'; // URL do backend em produção
     } else {
       this.apiURL = 'http://localhost:3000'; // Padrão
     }
@@ -224,13 +224,20 @@ export class App {
     this.http.post<any>(`${this.apiURL}/api/login`, credenciais).subscribe(
       (resultado: any) => {
         console.log('Login realizado:', resultado);
+        if (!resultado || !resultado.token) {
+          console.error('Resposta inválida da API:', resultado);
+          alert('Erro: Resposta inválida do servidor. Verifique se a API está rodando.');
+          this.novaSenhaUsuario = '';
+          return;
+        }
+        
         this.token = resultado.token;
-        this.isAdmin = resultado.isAdmin;
+        this.isAdmin = resultado.isAdmin || false;
         this.usuarioLogado = this.novoNomeUsuario;
         
         // Salva no localStorage
         localStorage.setItem('id-token', resultado.token);
-        localStorage.setItem('isAdmin', resultado.isAdmin.toString());
+        localStorage.setItem('isAdmin', this.isAdmin.toString());
         localStorage.setItem('usuarioLogado', this.novoNomeUsuario);
         
         this.limpaFormularioUsuario();
@@ -238,7 +245,8 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao fazer login:', erro);
-        alert('Erro ao fazer login: ' + erro.error.message);
+        const mensagem = erro?.error?.message || erro?.message || 'Erro desconhecido ao conectar com o servidor';
+        alert('Erro ao fazer login: ' + mensagem);
         this.novaSenhaUsuario = '';
       }
     );
