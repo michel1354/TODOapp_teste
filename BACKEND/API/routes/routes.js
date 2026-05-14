@@ -115,8 +115,6 @@ router.patch('/usuarios/:id', verificaAdmin, async (req, res) => {
       return res.status(400).json({ message: 'ID do usuário é obrigatório!' });
     }
 
-    const { nome, isAdmin } = req.body;
-    
     const { nome, senha, isAdmin } = req.body;
     
     // Valida se está tentando alterar nome
