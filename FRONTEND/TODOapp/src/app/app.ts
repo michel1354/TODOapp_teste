@@ -34,7 +34,7 @@ export class App {
     if (isDevelopment) {
       this.apiURL = 'http://localhost:3000';
     } else if (window.location.hostname.includes('onrender.com')) {
-      this.apiURL = 'https://apifarefas-michel-255441.onrender.com'; // URL do backend em produção
+      this.apiURL = 'https://apitarefas-michel-255441.onrender.com'; // URL do backend em produção
     } else {
       this.apiURL = 'http://localhost:3000'; // Padrão
     }
