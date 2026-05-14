@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router()
 const bcrypt = require('bcrypt');
-module.exports = router;
 const modeloTarefa = require('../models/tarefa');
 const userModel = require('../models/user');
 const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'segredo';
 
 // Middleware de Autorização - verifica JWT token
 function verificaJWT(req, res, next) {
@@ -12,7 +12,7 @@ function verificaJWT(req, res, next) {
   if (!token) return res.status(401).json({
     auth: false, message: 'Token nao fornecido'
   });
-  jwt.verify(token, 'segredo', function (err, decoded) {
+  jwt.verify(token, JWT_SECRET, function (err, decoded) {
     if (err) return res.status(500).json({ auth: false, message: 'Falha na autenticação!' });
     req.user = decoded;
     next();
@@ -25,7 +25,7 @@ function verificaAdmin(req, res, next) {
   if (!token) return res.status(401).json({
     auth: false, message: 'Token nao fornecido'
   });
-  jwt.verify(token, 'segredo', async function (err, decoded) {
+  jwt.verify(token, JWT_SECRET, async function (err, decoded) {
     if (err) return res.status(500).json({ auth: false, message: 'Falha na autenticação!' });
     
     // Busca o usuário para verificar se é admin
@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
     // Comparar senha com hash
     const senhaValida = await bcrypt.compare(req.body.senha, data.senha);
     if (senhaValida) {
-      const token = jwt.sign({ id: req.body.nome, isAdmin: data.isAdmin }, 'segredo', { expiresIn: 300 });
+      const token = jwt.sign({ id: req.body.nome, isAdmin: data.isAdmin }, JWT_SECRET, { expiresIn: 300 });
       return res.json({ auth: true, token: token, isAdmin: data.isAdmin });
     }
 
@@ -234,3 +234,5 @@ router.patch('/update/:id', verificaJWT, async (req, res) => {
         res.status(400).json({ message: error.message })
     }
 })
+
+module.exports = router;

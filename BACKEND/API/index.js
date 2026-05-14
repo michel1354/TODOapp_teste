@@ -1,28 +1,21 @@
 const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-
 const app = express();
-
-// CORS Configuration - permite requisições de qualquer origem
-const corsOptions = {
-  origin: ['https://todoapp-michel-255441.onrender.com', 'http://localhost:4200', 'http://127.0.0.1:4200'],
-  methods: ['HEAD', 'GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-  credentials: true,
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'id-token']
-};
-
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader('Access-Control-Allow-Methods', 'HEAD, GET, POST, PATCH, DELETE');
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
+});
 app.use(express.json());
-
 const PORT = process.env.PORT || 3000;
 const routes = require('./routes/routes');
 app.use('/api', routes);
-
 app.listen(PORT, () => {
     console.log(`Server Started at ${PORT}`)
 })
-
 //Configurando a conexao com o Banco de Dados
 var mongoose = require('mongoose');
 const mongoURL = process.env.MONGODB_URL || 'mongodb://localhost:27017/todoapp';

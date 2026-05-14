@@ -21,7 +21,7 @@
       <span>Usuário: <strong>{{ usuarioLogado }}</strong></span>
       <span *ngIf="isAdmin" class="badge-admin">ADMIN</span>
       <button class="btn-danger" (click)="logout()">Logout</button>
-      <button *ngIf="isAdmin" class="btn-usuarios" (click)="abireTelaUsuarios()">Gerenciar Usuários</button>
+      <button *ngIf="isAdmin" class="btn-usuarios" (click)="abrirTelaUsuarios()">Gerenciar Usuários</button>
     </div>
 
     <input class="lg-text-input" (keyup.enter)="CREATE_tarefa(campoNovoItem.value); campoNovoItem.value = '' "
@@ -43,7 +43,35 @@
         <button class="btn-close" (click)="fecharTelaUsuarios()">✕</button>
       </div>
 
-      <!-- Lista de Usuários PRIMEIRO -->
+      <!-- Formulário de Cadastro/Edição -->
+      <div class="form-usuarios">
+        <h3>{{ usuarioEmEdicao ? 'Editar Usuário' : 'Cadastrar Novo Usuário' }}</h3>
+        
+        <div class="form-group">
+          <label>Nome:</label>
+          <input type="text" [(ngModel)]="novoNomeUsuario" placeholder="Digite o nome do usuário" />
+        </div>
+
+        <div class="form-group" *ngIf="!usuarioEmEdicao">
+          <label>Senha:</label>
+          <input type="password" [(ngModel)]="novaSenhaUsuario" placeholder="Digite a senha (min 6 caracteres)" />
+        </div>
+
+        <div class="form-group checkbox">
+          <label>
+            <input type="checkbox" [(ngModel)]="novoIsAdminUsuario" />
+            É Administrador
+          </label>
+        </div>
+
+        <div class="form-buttons">
+          <button *ngIf="!usuarioEmEdicao" class="btn-primary" (click)="CREATE_usuario()">Cadastrar</button>
+          <button *ngIf="usuarioEmEdicao" class="btn-primary" (click)="UPDATE_usuario()">Atualizar</button>
+          <button class="btn-secondary" (click)="limpaFormularioUsuario()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- Lista de Usuários -->
       <div class="usuarios-list">
         <h3>Lista de Usuários ({{ arrayDeUsuarios().length }})</h3>
         <div *ngIf="arrayDeUsuarios().length === 0" class="vazio">
@@ -72,36 +100,6 @@
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <hr style="margin: 2rem 0; border: 1px solid #ddd;">
-
-      <!-- Formulário de Cadastro/Edição -->
-      <div class="form-usuarios">
-        <h3>{{ usuarioEmEdicao ? 'Editar Usuário' : 'Cadastrar Novo Usuário' }}</h3>
-        
-        <div class="form-group">
-          <label>Nome:</label>
-          <input type="text" [(ngModel)]="novoNomeUsuario" placeholder="Digite o nome do usuário" />
-        </div>
-
-        <div class="form-group" *ngIf="!usuarioEmEdicao">
-          <label>Senha:</label>
-          <input type="password" [(ngModel)]="novaSenhaUsuario" placeholder="Digite a senha (min 6 caracteres)" />
-        </div>
-
-        <div class="form-group checkbox">
-          <label>
-            <input type="checkbox" [(ngModel)]="novoIsAdminUsuario" />
-            É Administrador
-          </label>
-        </div>
-
-        <div class="form-buttons">
-          <button *ngIf="!usuarioEmEdicao" class="btn-primary" (click)="CREATE_usuario()">Cadastrar</button>
-          <button *ngIf="usuarioEmEdicao" class="btn-primary" (click)="UPDATE_usuario()">Atualizar</button>
-          <button class="btn-secondary" (click)="limpaFormularioUsuario()">Limpar</button>
-        </div>
       </div>
     </div>
   </div>

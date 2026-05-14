@@ -29,8 +29,15 @@ export class App {
 
   constructor(private http: HttpClient) {
     // Detecta se está em produção ou desenvolvimento
-    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    this.apiURL = isDevelopment ? 'http://localhost:3000' : 'https://todoapp-teste.onrender.com';
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.includes('localhost');
+    // Se estiver em desenvolvimento, usa localhost. Se estiver em produção com domínio customizado, usa para conectar no backend de produção
+    if (isDevelopment) {
+      this.apiURL = 'http://localhost:3000';
+    } else if (window.location.hostname.includes('onrender.com')) {
+      this.apiURL = 'https://todoapp-michel-255441.onrender.com'; // URL do backend em produção
+    } else {
+      this.apiURL = 'http://localhost:3000'; // Padrão
+    }
     
     // Recupera token e dados do usuário do localStorage
     const tokenSalvo = localStorage.getItem('id-token');
@@ -58,7 +65,7 @@ export class App {
     this.http.get<Tarefa[]>(`${this.apiURL}/api/getAll`, {
       headers: { 'id-token': this.token }
     }).subscribe(
-      (resultado : any) => this.arrayDeTarefas.set(resultado));
+      (resultado : any) => this.arrayDeTarefas.set(resultado.tarefas));
   }
 
   DELETE_tarefa(tarefaAserRemovida: Tarefa) {
@@ -82,7 +89,7 @@ export class App {
 
   // ===== GERENCIAMENTO DE USUÁRIOS =====
 
-  abireTelaUsuarios() {
+  abrirTelaUsuarios() {
     this.mostraTelaUsuarios.set(true);
     this.READ_usuarios();
     this.limpaFormularioUsuario();
@@ -103,11 +110,7 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao carregar usuários:', erro);
-        let mensagem = 'Erro ao carregar usuários';
-        if (erro.error && erro.error.message) {
-          mensagem = erro.error.message;
-        }
-        alert(mensagem);
+        alert('Erro ao carregar usuários: ' + erro.error.message);
       }
     );
   }
@@ -135,11 +138,7 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao criar usuário:', erro);
-        let mensagem = 'Erro ao cadastrar';
-        if (erro.error && erro.error.message) {
-          mensagem = erro.error.message;
-        }
-        alert(mensagem);
+        alert('Erro ao cadastrar: ' + erro.error.message);
       }
     );
   }
@@ -163,11 +162,7 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao atualizar usuário:', erro);
-        let mensagem = 'Erro ao atualizar';
-        if (erro.error && erro.error.message) {
-          mensagem = erro.error.message;
-        }
-        alert(mensagem);
+        alert('Erro ao atualizar: ' + erro.error.message);
       }
     );
   }
@@ -185,11 +180,7 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao deletar usuário:', erro);
-        let mensagem = 'Erro ao deletar';
-        if (erro.error && erro.error.message) {
-          mensagem = erro.error.message;
-        }
-        alert(mensagem);
+        alert('Erro ao deletar: ' + erro.error.message);
       }
     );
   }
@@ -247,17 +238,7 @@ export class App {
       },
       (erro: any) => {
         console.error('Erro ao fazer login:', erro);
-        let mensagem = 'Erro ao fazer login';
-        
-        if (erro.status === 0) {
-          mensagem = 'Erro de conexão com o servidor. Verifique se o servidor está rodando.';
-        } else if (erro.error && erro.error.message) {
-          mensagem = erro.error.message;
-        } else if (erro.error) {
-          mensagem = typeof erro.error === 'string' ? erro.error : JSON.stringify(erro.error);
-        }
-        
-        alert(mensagem);
+        alert('Erro ao fazer login: ' + erro.error.message);
         this.novaSenhaUsuario = '';
       }
     );

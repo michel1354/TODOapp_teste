@@ -8,6 +8,11 @@ const schemaTarefa = new mongoose.Schema({
  required: true,
  type: Boolean
  },
+ usuarioId: {
+ type: mongoose.Schema.Types.ObjectId,
+ ref: 'User',
+ required: false
+ },
 },
  {
  versionKey: false
